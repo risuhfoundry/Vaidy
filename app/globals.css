@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0f14;
+  --foreground: #e4e7ec;
+  --surface-0: #0f141a;
+  --surface-1: rgba(255, 255, 255, 0.03);
+  --surface-2: rgba(255, 255, 255, 0.05);
+  --surface-border: rgba(255, 255, 255, 0.11);
+  --text-muted: #9ea6b2;
+  --accent-emerald: #5fbca0;
+  --accent-emerald-soft: rgba(95, 188, 160, 0.16);
+  --accent-cyan: #6cb7c3;
+  --accent-cyan-soft: rgba(108, 183, 195, 0.14);
+  --glow-soft: 0 20px 60px rgba(6, 14, 19, 0.45);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0f14;
+    --foreground: #e4e7ec;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Inter, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.vaidy-section {
+  @apply relative isolate overflow-hidden bg-transparent px-6 py-12 text-zinc-100 sm:px-8 sm:py-14 lg:px-12 lg:py-16;
+}
+
+.vaidy-noise {
+  @apply pointer-events-none absolute inset-0 -z-10;
+}
+
+.vaidy-shell {
+  @apply rounded-[2rem] border p-6 backdrop-blur-xl sm:p-8 md:p-10;
+  border-color: var(--surface-border);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02));
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.01), var(--glow-soft);
+}
+
+.vaidy-card {
+  @apply rounded-2xl border backdrop-blur-xl;
+  border-color: var(--surface-border);
+  background: var(--surface-1);
+}
+
+.vaidy-pill {
+  @apply inline-flex items-center rounded-full border px-4 py-1 text-[11px] font-medium uppercase;
+  border-color: rgba(141, 214, 190, 0.25);
+  background: var(--accent-emerald-soft);
+  color: #b7e7d8;
+  letter-spacing: 0.2em;
+}
+
+.vaidy-title {
+  @apply mt-6 text-3xl leading-tight font-semibold tracking-[-0.02em] text-balance sm:text-4xl;
+}
+
+.vaidy-body {
+  @apply mt-4 max-w-xl text-sm leading-relaxed text-zinc-300 sm:text-base;
+}
+
+.vaidy-button-primary {
+  @apply rounded-xl px-7 py-3.5 text-sm font-semibold transition-transform;
+  color: #05251d;
+  background: linear-gradient(110deg, #83d2bc, #9ad8e1);
+  box-shadow: 0 10px 24px rgba(108, 183, 195, 0.2);
+}
+
+.vaidy-button-secondary {
+  @apply rounded-xl border px-7 py-3.5 text-sm font-semibold backdrop-blur-md transition-transform;
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(255, 255, 255, 0.92);
+}
