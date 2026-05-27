@@ -8,8 +8,14 @@ const config = {
       colors: {
         "bg-void": "#050508",
         surface: "#0e0e14",
+        "surface-2": "#141414",
         glass: "#ffffff08",
         border: "#ffffff12",
+        "warm-white": "#F5F0E8",
+        gold: {
+          300: "#D4BC8A",
+          400: "#C8A96E",
+        },
         emerald: {
           400: "#34d399",
         },

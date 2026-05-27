@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -7,10 +7,17 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+const instrumentSerif = Instrument_Serif({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-serif",
+  style: ["normal", "italic"],
+});
+
 export const metadata: Metadata = {
-  title: "Vaidy - Your AI Health Copilot, Built for India",
+  title: "Vaidy AI — Your AI Health Copilot, Built for India",
   description:
-    "Vaidy reads health reports, remembers your history, and explains everything in plain language for India.",
+    "Upload blood reports from Apollo, Thyrocare, or Lal Path Labs. Detect trends, understand biomarkers, and get plain-language explanations in Hindi or English.",
 };
 
 export default function RootLayout({
@@ -19,8 +26,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body>{children}</body>
+    <html
+      lang="en"
+      className={`${inter.variable} ${instrumentSerif.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col">
+        {/* Single dramatic light source from top center */}
+        <div className="page-light" aria-hidden="true" />
+        {/* Vignette to deepen the corners */}
+        <div className="vignette" aria-hidden="true" />
+
+        <div className="relative z-10 flex flex-1 flex-col">{children}</div>
+      </body>
     </html>
   );
 }

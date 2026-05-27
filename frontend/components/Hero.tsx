@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import GlowOrbs from "@/components/GlowOrbs";
 import ParticleField from "@/components/ParticleField";
 
 const container = {
@@ -25,7 +24,6 @@ export default function Hero() {
       id="hero"
       className="relative flex min-h-screen items-center overflow-hidden bg-bg-void px-6 py-24 md:px-8"
     >
-      <GlowOrbs />
       <ParticleField count={25} />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_115%,rgba(52,211,153,0.12),transparent_38%)]" />
 
