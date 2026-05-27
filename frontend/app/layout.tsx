@@ -1,23 +1,70 @@
 import type { Metadata } from "next";
-import { Inter, Instrument_Serif } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 import "./globals.css";
+import { WaitlistProvider } from "@/components/WaitlistProvider";
 
-const inter = Inter({
-  variable: "--font-inter",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
-const instrumentSerif = Instrument_Serif({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-serif",
-  style: ["normal", "italic"],
-});
+const SITE_URL = "https://vaidy.vercel.app";
+const SITE_TITLE = "Vaidy — Your AI Health Copilot, Built for India";
+const SITE_DESCRIPTION =
+  "Upload blood reports from Apollo, Thyrocare, or Lal Path Labs. Detect trends, understand biomarkers, and get plain-language explanations in Hindi or English.";
 
 export const metadata: Metadata = {
-  title: "Vaidy AI — Your AI Health Copilot, Built for India",
-  description:
-    "Upload blood reports from Apollo, Thyrocare, or Lal Path Labs. Detect trends, understand biomarkers, and get plain-language explanations in Hindi or English.",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  applicationName: "Vaidy",
+  keywords: [
+    "Vaidy",
+    "AI health copilot",
+    "Apollo",
+    "Thyrocare",
+    "Lal Path Labs",
+    "blood report analysis",
+    "biomarker trends",
+    "health AI India",
+  ],
+  authors: [{ name: "Vaidy" }],
+  alternates: {
+    canonical: SITE_URL,
+  },
+  openGraph: {
+    type: "website",
+    url: SITE_URL,
+    siteName: "Vaidy",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    locale: "en_IN",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Vaidy — Your AI Health Copilot, Built for India",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({
@@ -28,15 +75,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${instrumentSerif.variable} h-full antialiased`}
+      className={`${dmSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {/* Single dramatic light source from top center */}
         <div className="page-light" aria-hidden="true" />
-        {/* Vignette to deepen the corners */}
         <div className="vignette" aria-hidden="true" />
 
-        <div className="relative z-10 flex flex-1 flex-col">{children}</div>
+        <WaitlistProvider>
+          <div className="relative z-10 flex flex-1 flex-col">{children}</div>
+        </WaitlistProvider>
       </body>
     </html>
   );

@@ -1,107 +1,143 @@
 "use client";
 
 import { motion } from "framer-motion";
-import ParticleField from "@/components/ParticleField";
+import type { MouseEvent } from "react";
+import { useWaitlist } from "@/components/WaitlistProvider";
 
-const container = {
-  hidden: {},
-  visible: {
-    transition: {
-      delayChildren: 0.1,
-      staggerChildren: 0.1,
-    },
-  },
-};
+const orbs = [
+  { left: "-10%", top: "10%", size: 520, color: "rgba(0,217,126,0.12)", blur: 120, delay: 0 },
+  { left: "55%", top: "-5%", size: 460, color: "rgba(0,196,184,0.09)", blur: 130, delay: 2 },
+  { left: "30%", top: "60%", size: 380, color: "rgba(167,139,250,0.07)", blur: 140, delay: 4 },
+];
 
-const fadeInUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
+function scrollToAnchor(event: MouseEvent<HTMLAnchorElement>, href: string) {
+  const target = document.getElementById(href.slice(1));
+  if (!target) return;
+  event.preventDefault();
+  window.history.pushState(null, "", href);
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
 export default function Hero() {
+  const { openWaitlist } = useWaitlist();
+
   return (
-    <section
-      id="hero"
-      className="relative flex min-h-screen items-center overflow-hidden bg-bg-void px-6 py-24 md:px-8"
-    >
-      <ParticleField count={25} />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_115%,rgba(52,211,153,0.12),transparent_38%)]" />
+    <section id="hero" className="relative flex min-h-screen items-center justify-center overflow-hidden bg-bg-void px-6 py-24 text-center">
+      {orbs.map((orb) => (
+        <motion.div
+          key={`${orb.left}-${orb.top}`}
+          className="pointer-events-none absolute rounded-full"
+          style={{
+            left: orb.left,
+            top: orb.top,
+            width: orb.size,
+            height: orb.size,
+            background: orb.color,
+            filter: `blur(${orb.blur}px)`,
+          }}
+          animate={{ scale: [1, 1.12, 1], opacity: [0.35, 0.55, 0.35] }}
+          transition={{ duration: 8 + orb.delay, repeat: Infinity, ease: "easeInOut", delay: orb.delay }}
+        />
+      ))}
+
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[length:40px_40px]"
+        aria-hidden="true"
+      />
 
       <motion.div
-        className="relative z-10 mx-auto max-w-5xl text-center"
+        className="relative z-10 mx-auto max-w-[900px]"
         initial="hidden"
         animate="visible"
-        variants={container}
+        variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1 } } }}
       >
-        <motion.h1
-          className="text-display-lg font-semibold leading-[0.96] tracking-display text-white"
-          initial={{ y: 18 }}
-          animate={{ y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+        <motion.div
+          className="mb-8 inline-flex items-center gap-2 rounded-3xl border border-emerald-400/20 bg-emerald-400/[0.08] py-1.5 pl-2.5 pr-3.5"
+          variants={{ hidden: { opacity: 0, y: -12 }, visible: { opacity: 1, y: 0 } }}
+          transition={{ duration: 0.5 }}
         >
-          Your AI Health Copilot
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#00d97e]" />
+          <span className="text-[12.5px] font-semibold uppercase tracking-[0.04em] text-emerald-400/85">
+            AI Health Copilot for India
+          </span>
+        </motion.div>
+
+        <motion.h1
+          className="text-[clamp(3rem,8vw,6.5rem)] font-extrabold leading-[0.95] tracking-[-0.04em] text-white"
+          variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+          transition={{ duration: 0.7, delay: 0.1 }}
+        >
+          Your health,
           <br />
-          <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-            Built for India.
+          <span className="bg-gradient-to-br from-emerald-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">
+            finally decoded.
           </span>
         </motion.h1>
 
         <motion.p
-          className="mx-auto mt-7 max-w-3xl text-base leading-8 text-white/60 md:text-xl md:leading-9"
-          variants={fadeInUp}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="mx-auto mt-7 max-w-[640px] text-[clamp(1rem,2.5vw,1.25rem)] leading-[1.7] text-white/55"
+          variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+          transition={{ duration: 0.7, delay: 0.25 }}
         >
           Not a chatbot. A health brain that reads your reports, remembers your history,
-          and explains everything in plain language.
+          and explains everything in plain language you'll actually understand.
         </motion.p>
 
         <motion.div
-          className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
-          variants={fadeInUp}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="mt-10 flex flex-wrap justify-center gap-3"
+          variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+          transition={{ duration: 0.7, delay: 0.4 }}
         >
-          <motion.a
-            href="#how-it-works"
-            className="inline-flex h-12 items-center justify-center rounded-full bg-emerald-400 px-6 text-sm font-semibold text-[#031411] shadow-[0_0_42px_rgba(52,211,153,0.3)] outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-emerald-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-void"
-            whileHover={{ y: -2, scale: 1.02, boxShadow: "0 0 56px rgba(52,211,153,0.46)" }}
-            whileTap={{ scale: 0.98 }}
+          <motion.button
+            type="button"
+            onClick={openWaitlist}
+            className="inline-flex items-center gap-2 rounded-[32px] bg-emerald-400 px-7 py-3.5 text-[15px] font-bold text-[#03120a] shadow-[0_0_32px_rgba(0,217,126,0.35)]"
+            whileHover={{ scale: 1.04, boxShadow: "0 0 48px rgba(0,217,126,0.5)" }}
+            whileTap={{ scale: 0.97 }}
           >
             Upload a Report
-          </motion.a>
-
+            <span aria-hidden="true">-&gt;</span>
+          </motion.button>
           <motion.a
-            href="#how-it-works"
-            className="inline-flex h-12 items-center justify-center rounded-full border border-white/12 bg-white/[0.03] px-6 text-sm font-medium text-white/85 backdrop-blur-md outline-none transition-colors hover:bg-white/[0.06] focus-visible:ring-2 focus-visible:ring-white/30"
-            whileHover={{ y: -2, scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            href="#demo"
+            onClick={(event) => scrollToAnchor(event, "#demo")}
+            className="inline-flex items-center gap-2 rounded-[32px] border border-white/10 bg-white/[0.06] px-7 py-3.5 text-[15px] font-semibold text-white/80 no-underline"
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.97 }}
           >
-            See How it Works
+            Watch demo
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <polygon points="5,3 19,12 5,21" opacity="0.7" />
+            </svg>
           </motion.a>
+        </motion.div>
+
+        <motion.div
+          className="mt-14 flex flex-wrap items-center justify-center gap-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+        >
+          {["Apollo", "Thyrocare", "Lal Path Labs", "Dr. Lal"].map((lab) => (
+            <span key={lab} className="text-[12.5px] tracking-[0.02em] text-white/30">
+              {lab}
+            </span>
+          ))}
+          <span className="text-xs text-white/20">+50 more labs</span>
         </motion.div>
       </motion.div>
 
       <motion.a
-        href="#how-it-works"
-        className="absolute bottom-7 left-1/2 z-10 -translate-x-1/2 text-white/40 transition-colors hover:text-white/70"
-        aria-label="Scroll to report upload preview"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.9, duration: 0.5 }}
+        href="#features"
+        onClick={(event) => scrollToAnchor(event, "#features")}
+        className="absolute bottom-7 left-1/2 z-10 -translate-x-1/2 text-white/30"
+        aria-label="Scroll to features"
+        animate={{ y: [0, 8, 0] }}
+        transition={{ duration: 2, repeat: Infinity }}
       >
-        <motion.svg
-          className="h-7 w-7"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          animate={{ y: [0, 7, 0] }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-          aria-hidden="true"
-        >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
           <path d="m6 9 6 6 6-6" />
-        </motion.svg>
+        </svg>
       </motion.a>
     </section>
   );

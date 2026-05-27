@@ -1,75 +1,38 @@
-'use client';
+import Link from "next/link";
 
-const footerColumns = [
-  {
-    title: 'Product',
-    links: [
-      { label: 'Features', href: '#features' },
-      { label: 'How it works', href: '#how-it-works' },
-      { label: 'Demo', href: '#demo' },
-    ],
-  },
-  {
-    title: 'Company',
-    links: [
-      { label: 'About', href: '#' },
-      { label: 'Privacy', href: '#' },
-      { label: 'Contact', href: '#' },
-    ],
-  },
-  {
-    title: 'Resources',
-    links: [
-      { label: 'Supported labs', href: '#' },
-      { label: 'Help centre', href: '#' },
-      { label: 'Status', href: '#' },
-    ],
-  },
+const footerLinks = [
+  { label: "Privacy", href: "/privacy" },
+  { label: "Terms", href: "/terms" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export default function Footer() {
   return (
-    <footer className="relative border-t border-warm-white/6 bg-transparent">
-      <div className="mx-auto w-full max-w-7xl px-6 py-16 md:px-8">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
-          {/* Brand */}
-          <div>
-            <div className="flex items-center gap-2.5">
-              <span className="h-2 w-2 rounded-full bg-gold-400 opacity-80" aria-hidden="true" />
-              <span className="font-serif text-lg text-warm-white">Vaidy</span>
-            </div>
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-warm-white/40">
-              Your AI health copilot — built for India. Reads every report, explains every change.
-            </p>
-          </div>
+    <footer className="bg-[#030408] px-6 py-8 text-white border-t border-white/[0.06]">
+      <div className="mx-auto flex max-w-[1100px] flex-wrap items-center justify-center gap-4 text-center sm:justify-between sm:text-left">
+        <div className="flex items-center gap-2">
+          <span
+            className="h-5 w-5 rounded-md bg-gradient-to-br from-emerald-400 to-teal-300"
+            aria-hidden="true"
+          />
+          <span className="text-[15px] font-bold tracking-[-0.03em]">vaidy</span>
+        </div>
 
-          {/* Link columns */}
-          {footerColumns.map((col) => (
-            <div key={col.title}>
-              <p className="text-[11px] tracking-[0.18em] text-warm-white/40 uppercase">
-                {col.title}
-              </p>
-              <ul className="mt-4 space-y-2.5">
-                {col.links.map((link) => (
-                  <li key={link.label}>
-                    <a
-                      href={link.href}
-                      className="text-sm text-warm-white/60 ease-premium transition-colors hover:text-warm-white"
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
+        <nav className="flex items-center gap-5" aria-label="Footer navigation">
+          {footerLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-[13px] text-white/35 transition-colors hover:text-white"
+            >
+              {link.label}
+            </Link>
           ))}
-        </div>
+        </nav>
 
-        {/* Bottom row */}
-        <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-warm-white/6 pt-6 text-xs text-warm-white/30 sm:flex-row sm:items-center">
-          <p>© {new Date().getFullYear()} Vaidy. All rights reserved.</p>
-          <p>Made in India · For India.</p>
-        </div>
+        <p className="text-xs text-white/20">
+          (c) {new Date().getFullYear()} Vaidy. Built for India.
+        </p>
       </div>
     </footer>
   );

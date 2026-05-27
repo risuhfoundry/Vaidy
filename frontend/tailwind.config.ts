@@ -2,37 +2,42 @@ const config = {
   content: [
     "./app/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
+    "./sections/**/*.{ts,tsx}",
   ],
   theme: {
     extend: {
       colors: {
-        "bg-void": "#050508",
-        surface: "#0e0e14",
-        "surface-2": "#141414",
-        glass: "#ffffff08",
-        border: "#ffffff12",
-        "warm-white": "#F5F0E8",
+        "bg-void": "#04050a",
+        surface: "#060810",
+        "surface-2": "#0a0d16",
+        glass: "rgba(255,255,255,0.025)",
+        border: "rgba(255,255,255,0.07)",
+        "warm-white": "#ffffff",
         gold: {
-          300: "#D4BC8A",
-          400: "#C8A96E",
+          300: "#00c4b8",
+          400: "#00d97e",
         },
         emerald: {
-          400: "#34d399",
+          400: "#00d97e",
         },
         teal: {
-          300: "#5eead4",
+          300: "#00c4b8",
         },
         indigo: {
-          400: "#818cf8",
+          400: "#a78bfa",
         },
       },
+      fontFamily: {
+        sans: ["var(--font-dm-sans)", "DM Sans", "ui-sans-serif", "system-ui", "sans-serif"],
+        serif: ["var(--font-dm-sans)", "DM Sans", "ui-sans-serif", "system-ui", "sans-serif"],
+      },
       fontSize: {
-        "display-xl": ["clamp(3.75rem, 9vw, 8rem)", { lineHeight: "0.96", letterSpacing: "-0.045em" }],
-        "display-lg": ["clamp(3rem, 7vw, 6.5rem)", { lineHeight: "0.98", letterSpacing: "-0.04em" }],
-        "display-md": ["clamp(2.5rem, 5vw, 4.5rem)", { lineHeight: "1", letterSpacing: "-0.035em" }],
+        "display-xl": ["clamp(3rem, 8vw, 6.5rem)", { lineHeight: "0.95", letterSpacing: "-0.04em" }],
+        "display-lg": ["clamp(3rem, 8vw, 6.5rem)", { lineHeight: "0.95", letterSpacing: "-0.04em" }],
+        "display-md": ["clamp(2rem, 5vw, 3.5rem)", { lineHeight: "1.1", letterSpacing: "-0.03em" }],
       },
       letterSpacing: {
-        display: "-0.045em",
+        display: "-0.04em",
       },
       opacity: {
         8: "0.08",
@@ -49,8 +54,8 @@ const config = {
           "50%": { transform: "translate3d(0, -18px, 0)" },
         },
         "pulse-glow": {
-          "0%, 100%": { opacity: "0.55", boxShadow: "0 0 0 0 rgba(52, 211, 153, 0.45)" },
-          "50%": { opacity: "1", boxShadow: "0 0 24px 4px rgba(52, 211, 153, 0.45)" },
+          "0%, 100%": { opacity: "0.55", boxShadow: "0 0 0 0 rgba(0, 217, 126, 0.45)" },
+          "50%": { opacity: "1", boxShadow: "0 0 24px 4px rgba(0, 217, 126, 0.45)" },
         },
         shimmer: {
           "0%": { backgroundPosition: "-220% center" },

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 
 const EMERALD = "#00d97e";
@@ -9,6 +10,28 @@ const TEAL = "#00c4b8";
 const VOID = "#04050a";
 const WAITLIST_STORAGE_KEY = "vaidy_waitlist_submissions";
 const WAITLIST_SUCCESS_MESSAGE = "You're on the list 🎉 We'll notify you when Vaidy launches.";
+
+const NAV_LINKS = [
+  { label: "Features", href: "#features" },
+  { label: "How it works", href: "#how-it-works" },
+  { label: "Demo", href: "#demo" },
+];
+const FOOTER_LINKS = [
+  { label: "Privacy", href: "/privacy" },
+  { label: "Terms", href: "/terms" },
+  { label: "Contact", href: "/contact" },
+];
+
+function handleSmoothAnchorClick(event, href) {
+  if (!href.startsWith("#")) return;
+
+  const target = document.getElementById(href.slice(1));
+  if (!target) return;
+
+  event.preventDefault();
+  window.history.pushState(null, "", href);
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
 function useMouseGlow() {
   const [pos, setPos] = useState({ x: -999, y: -999 });
@@ -24,7 +47,7 @@ function useIsMobile() {
   const [mobile, setMobile] = useState(false);
 
   useEffect(() => {
-    const media = window.matchMedia("(max-width: 760px)");
+    const media = window.matchMedia("(max-width: 768px)");
     const sync = () => setMobile(media.matches);
 
     sync();
@@ -350,6 +373,36 @@ function Navbar({ scrollY, onOpenWaitlist }) {
   const bg = useTransform(scrollY, [0, 80], ["rgba(4,5,10,0)", "rgba(4,5,10,0.92)"]);
   const bdr = useTransform(scrollY, [0, 80], ["rgba(255,255,255,0)", "rgba(255,255,255,0.06)"]);
 
+  // Close menu when switching back to desktop
+  useEffect(() => {
+    if (!mobile && open) setOpen(false);
+  }, [mobile, open]);
+
+  // Lock body scroll while menu is open
+  useEffect(() => {
+    if (!open) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, [open]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open]);
+
+  const handleNavClick = (event, href) => {
+    setOpen(false);
+    handleSmoothAnchorClick(event, href);
+  };
+
   return (
     <motion.header
       style={{
@@ -359,7 +412,7 @@ function Navbar({ scrollY, onOpenWaitlist }) {
       }}
     >
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: mobile ? "0 16px" : "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <a href="#" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+        <a href="#hero" onClick={(event) => handleNavClick(event, "#hero")} style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
           <div style={{ width: 28, height: 28, borderRadius: 8, background: `linear-gradient(135deg, ${EMERALD}, ${TEAL})`, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3v3M21 12h-3M12 21v-3M3 12h3" stroke="#04050a" strokeWidth="2.5" strokeLinecap="round"/><circle cx="12" cy="12" r="4" fill="#04050a"/></svg>
           </div>
@@ -367,32 +420,131 @@ function Navbar({ scrollY, onOpenWaitlist }) {
         </a>
 
         <nav style={{ display: mobile ? "none" : "flex", gap: 4, alignItems: "center" }}>
-          {["Features", "How it works", "Demo"].map(l => (
-            <a key={l} href="#" style={{ padding: "6px 14px", fontSize: 13.5, color: "rgba(255,255,255,0.6)", textDecoration: "none", borderRadius: 20, transition: "all 0.15s", fontFamily: "'DM Sans', sans-serif" }}
+          {NAV_LINKS.map(({ label, href }) => (
+            <a key={label} href={href} onClick={(event) => handleSmoothAnchorClick(event, href)} style={{ padding: "6px 14px", fontSize: 13.5, color: "rgba(255,255,255,0.6)", textDecoration: "none", borderRadius: 20, transition: "all 0.15s", fontFamily: "'DM Sans', sans-serif" }}
               onMouseEnter={e => e.target.style.color = "#fff"}
               onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.6)"}
-            >{l}</a>
+            >{label}</a>
           ))}
           <motion.button type="button" onClick={onOpenWaitlist} whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
             style={{ marginLeft: 8, padding: "7px 20px", background: EMERALD, color: "#03120a", border: "none", borderRadius: 24, fontSize: 13.5, fontWeight: 600, fontFamily: "'DM Sans', sans-serif", boxShadow: `0 0 24px rgba(0,217,126,0.3)`, cursor: "pointer" }}>
             Try free
           </motion.button>
         </nav>
+
+        {/* Mobile hamburger */}
+        {mobile && (
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-label={open ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={open}
+            aria-controls="mobile-nav-panel"
+            style={{
+              width: 40, height: 40, display: "inline-flex", alignItems: "center", justifyContent: "center",
+              borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)",
+              background: "rgba(255,255,255,0.03)", color: "#fff", cursor: "pointer",
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+              {open ? (
+                <>
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                </>
+              ) : (
+                <>
+                  <line x1="4" y1="7" x2="20" y2="7" />
+                  <line x1="4" y1="12" x2="20" y2="12" />
+                  <line x1="4" y1="17" x2="20" y2="17" />
+                </>
+              )}
+            </svg>
+          </button>
+        )}
       </div>
+
+      {/* Mobile nav panel */}
+      <AnimatePresence initial={false}>
+        {mobile && open && (
+          <motion.div
+            id="mobile-nav-panel"
+            key="mobile-nav-panel"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.24, ease: "easeInOut" }}
+            style={{
+              overflow: "hidden",
+              background: "rgba(4,5,10,0.96)",
+              borderTop: "1px solid rgba(255,255,255,0.06)",
+              backdropFilter: "blur(24px)",
+            }}
+          >
+            <nav aria-label="Mobile" style={{ padding: "12px 16px 18px" }}>
+              <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+                {NAV_LINKS.map(({ label, href }) => (
+                  <li key={label}>
+                    <a
+                      href={href}
+                      onClick={(event) => handleNavClick(event, href)}
+                      style={{
+                        display: "block",
+                        padding: "12px 14px",
+                        fontSize: 15,
+                        color: "rgba(255,255,255,0.78)",
+                        textDecoration: "none",
+                        borderRadius: 12,
+                        fontFamily: "'DM Sans', sans-serif",
+                      }}
+                    >
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  onOpenWaitlist();
+                }}
+                style={{
+                  width: "100%",
+                  marginTop: 10,
+                  padding: "13px 20px",
+                  background: EMERALD,
+                  color: "#03120a",
+                  border: "none",
+                  borderRadius: 14,
+                  fontSize: 15,
+                  fontWeight: 700,
+                  fontFamily: "'DM Sans', sans-serif",
+                  boxShadow: `0 0 24px rgba(0,217,126,0.3)`,
+                  cursor: "pointer",
+                }}
+              >
+                Try free
+              </button>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.header>
   );
 }
 
 function Hero({ onOpenWaitlist }) {
+  const mobile = useIsMobile();
   return (
-    <section style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden", background: VOID }}>
+    <section id="hero" style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden", background: VOID }}>
       <Orb cx="-10%" cy="10%" size={520} color="rgba(0,217,126,0.12)" blur={120} delay={0} />
       <Orb cx="55%" cy="-5%" size={460} color="rgba(0,196,184,0.09)" blur={130} delay={2} />
       <Orb cx="30%" cy="60%" size={380} color="rgba(100,80,255,0.07)" blur={140} delay={4} />
 
       <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)", backgroundSize: "40px 40px", pointerEvents: "none" }} />
 
-      <div style={{ position: "relative", zIndex: 1, textAlign: "center", maxWidth: 900, padding: "0 24px" }}>
+      <div style={{ position: "relative", zIndex: 1, textAlign: "center", maxWidth: 900, padding: mobile ? "0 16px" : "0 24px", width: "100%" }}>
         <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
           style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(0,217,126,0.08)", border: "1px solid rgba(0,217,126,0.2)", borderRadius: 24, padding: "6px 14px 6px 10px", marginBottom: 32 }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: EMERALD, boxShadow: `0 0 8px ${EMERALD}` }} />
@@ -400,25 +552,37 @@ function Hero({ onOpenWaitlist }) {
         </motion.div>
 
         <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }}
-          style={{ fontSize: "clamp(3rem, 8vw, 6.5rem)", fontWeight: 800, lineHeight: 0.95, letterSpacing: "-0.04em", color: "#fff", fontFamily: "'DM Sans', sans-serif", marginBottom: 8 }}>
+          style={{ fontSize: "clamp(2.25rem, 9vw, 6.5rem)", fontWeight: 800, lineHeight: 0.98, letterSpacing: "-0.04em", color: "#fff", fontFamily: "'DM Sans', sans-serif", marginBottom: 8, wordBreak: "break-word", overflowWrap: "anywhere" }}>
           Your health,<br />
           <span style={{ background: `linear-gradient(135deg, ${EMERALD} 0%, ${TEAL} 60%, #a78bfa 100%)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>finally decoded.</span>
         </motion.h1>
 
         <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.25 }}
-          style={{ fontSize: "clamp(1rem, 2.5vw, 1.25rem)", color: "rgba(255,255,255,0.55)", maxWidth: 640, margin: "28px auto 0", lineHeight: 1.7, fontFamily: "'DM Sans', sans-serif" }}>
+          style={{ fontSize: "clamp(0.95rem, 2.5vw, 1.25rem)", color: "rgba(255,255,255,0.55)", maxWidth: 640, margin: "28px auto 0", lineHeight: 1.7, fontFamily: "'DM Sans', sans-serif" }}>
           Not a chatbot. A health brain that reads your reports, remembers your history, and explains everything — in plain language you'll actually understand.
         </motion.p>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }}
-          style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 40, flexWrap: "wrap" }}>
+          style={{
+            display: "flex",
+            flexDirection: mobile ? "column" : "row",
+            gap: 12,
+            justifyContent: "center",
+            alignItems: "stretch",
+            marginTop: 40,
+            flexWrap: "wrap",
+            width: "100%",
+            maxWidth: mobile ? 360 : "none",
+            marginLeft: "auto",
+            marginRight: "auto",
+          }}>
           <motion.button type="button" onClick={onOpenWaitlist} whileHover={{ scale: 1.04, boxShadow: `0 0 48px rgba(0,217,126,0.5)` }} whileTap={{ scale: 0.97 }}
-            style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "14px 28px", background: EMERALD, color: "#03120a", border: "none", borderRadius: 32, fontSize: 15, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", boxShadow: `0 0 32px rgba(0,217,126,0.35)`, transition: "box-shadow 0.2s", cursor: "pointer" }}>
+            style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "14px 28px", background: EMERALD, color: "#03120a", border: "none", borderRadius: 32, fontSize: 15, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", boxShadow: `0 0 32px rgba(0,217,126,0.35)`, transition: "box-shadow 0.2s", cursor: "pointer", width: mobile ? "100%" : "auto" }}>
             Upload a Report
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#03120a" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </motion.button>
-          <motion.a href="#" whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-            style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "14px 28px", background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.8)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 32, fontSize: 15, fontWeight: 600, textDecoration: "none", fontFamily: "'DM Sans', sans-serif" }}>
+          <motion.a href="#demo" onClick={(event) => handleSmoothAnchorClick(event, "#demo")} whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
+            style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "14px 28px", background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.8)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 32, fontSize: 15, fontWeight: 600, textDecoration: "none", fontFamily: "'DM Sans', sans-serif", width: mobile ? "100%" : "auto" }}>
             Watch demo
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="5,3 19,12 5,21" fill="currentColor" opacity="0.7"/></svg>
           </motion.a>
@@ -441,18 +605,23 @@ function Hero({ onOpenWaitlist }) {
 }
 
 function AnimatedCounter({ active, value, decimals = 0, suffix = "" }) {
-  const [displayValue, setDisplayValue] = useState(0);
+  // Non-zero fallback for SSR/no-JS: render the final number by default.
+  const [displayValue, setDisplayValue] = useState(value);
+  const hasAnimatedRef = useRef(false);
 
   useEffect(() => {
-    if (!active) return;
+    if (!active || hasAnimatedRef.current) return;
+    hasAnimatedRef.current = true;
 
     let frameId;
-    const duration = 1400;
+    const duration = 2000;
     const start = performance.now();
+
+    const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
 
     const tick = (now) => {
       const progress = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
+      const eased = easeOutCubic(progress);
       setDisplayValue(value * eased);
 
       if (progress < 1) {
@@ -462,15 +631,21 @@ function AnimatedCounter({ active, value, decimals = 0, suffix = "" }) {
       }
     };
 
+    // Start from 0 on the first animation frame (only when active).
+    setDisplayValue(0);
     frameId = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(frameId);
   }, [active, value]);
 
-  const formattedValue = decimals > 0
-    ? displayValue.toFixed(decimals)
-    : Math.round(displayValue).toLocaleString("en-IN");
+  const formattedValue =
+    decimals > 0 ? Number(displayValue).toFixed(decimals) : Math.round(displayValue).toLocaleString("en-IN");
 
-  return <>{formattedValue}{suffix}</>;
+  return (
+    <>
+      {formattedValue}
+      {suffix}
+    </>
+  );
 }
 
 function SocialProofSection() {
@@ -543,43 +718,44 @@ function SocialProofSection() {
       />
 
       <div style={{ maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <motion.div
-          ref={statsRef}
-          initial={{ opacity: 0, y: 22 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.35 }}
-          transition={{ duration: 0.62, ease: "easeOut" }}
-          style={{
-            display: "grid",
-            gridTemplateColumns: mobile ? "1fr" : "repeat(3, 1fr)",
-            gap: mobile ? 10 : 0,
-            overflow: "hidden",
-            border: "1px solid rgba(255,255,255,0.075)",
-            borderRadius: 22,
-            background: "linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.022))",
-            boxShadow: "0 24px 70px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.05)",
-            backdropFilter: "blur(18px)",
-          }}
-        >
-          {stats.map((stat, index) => (
-            <div
-              key={stat.label}
-              style={{
-                padding: mobile ? "22px 20px" : "28px 26px",
-                textAlign: "center",
-                borderLeft: !mobile && index > 0 ? "1px solid rgba(255,255,255,0.07)" : "none",
-                borderTop: mobile && index > 0 ? "1px solid rgba(255,255,255,0.07)" : "none",
-              }}
-            >
-              <p style={{ margin: 0, color: "rgba(255,255,255,0.94)", fontSize: mobile ? 32 : 38, lineHeight: 1, fontWeight: 800, letterSpacing: "-0.04em", fontFamily: "'DM Sans', sans-serif" }}>
-                <AnimatedCounter active={statsVisible} value={stat.value} decimals={stat.decimals || 0} suffix={stat.suffix || ""} />
-              </p>
-              <p style={{ margin: "10px 0 0", color: "rgba(255,255,255,0.45)", fontSize: 13.5, fontFamily: "'DM Sans', sans-serif" }}>
-                {stat.label}
-              </p>
-            </div>
-          ))}
-        </motion.div>
+        <div ref={statsRef}>
+          <motion.div
+            initial={{ opacity: 0, y: 22 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.35 }}
+            transition={{ duration: 0.62, ease: "easeOut" }}
+            style={{
+              display: "grid",
+              gridTemplateColumns: mobile ? "1fr" : "repeat(3, 1fr)",
+              gap: mobile ? 10 : 0,
+              overflow: "hidden",
+              border: "1px solid rgba(255,255,255,0.075)",
+              borderRadius: 22,
+              background: "linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.022))",
+              boxShadow: "0 24px 70px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.05)",
+              backdropFilter: "blur(18px)",
+            }}
+          >
+            {stats.map((stat, index) => (
+              <div
+                key={stat.label}
+                style={{
+                  padding: mobile ? "22px 20px" : "28px 26px",
+                  textAlign: "center",
+                  borderLeft: !mobile && index > 0 ? "1px solid rgba(255,255,255,0.07)" : "none",
+                  borderTop: mobile && index > 0 ? "1px solid rgba(255,255,255,0.07)" : "none",
+                }}
+              >
+                <p style={{ margin: 0, color: "rgba(255,255,255,0.94)", fontSize: mobile ? 32 : 38, lineHeight: 1, fontWeight: 800, letterSpacing: "-0.04em", fontFamily: "'DM Sans', sans-serif" }}>
+                  <AnimatedCounter active={statsVisible} value={stat.value} decimals={stat.decimals || 0} suffix={stat.suffix || ""} />
+                </p>
+                <p style={{ margin: "10px 0 0", color: "rgba(255,255,255,0.45)", fontSize: 13.5, fontFamily: "'DM Sans', sans-serif" }}>
+                  {stat.label}
+                </p>
+              </div>
+            ))}
+          </motion.div>
+        </div>
 
         <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr" : "repeat(3, 1fr)", gap: 16, marginTop: 24 }}>
           {testimonials.map((item, index) => (
@@ -652,7 +828,7 @@ function UploadSection() {
   const mobile = useIsMobile();
 
   return (
-    <section style={{ background: VOID, padding: "120px 24px", position: "relative", overflow: "hidden" }}>
+    <section id="how-it-works" style={{ background: VOID, padding: "120px 24px", position: "relative", overflow: "hidden" }}>
       <Orb cx="70%" cy="20%" size={400} color="rgba(0,196,184,0.07)" blur={120} delay={1} />
 
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
@@ -767,7 +943,7 @@ function ExplainSection() {
   const text = SAMPLE.slice(0, count);
 
   return (
-    <section ref={ref} style={{ background: "#060810", padding: "120px 24px", position: "relative", overflow: "hidden" }}>
+    <section id="demo" ref={ref} style={{ background: "#060810", padding: "120px 24px", position: "relative", overflow: "hidden" }}>
       <Orb cx="-5%" cy="50%" size={500} color="rgba(0,217,126,0.07)" blur={130} delay={0} />
 
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
@@ -871,24 +1047,82 @@ function TimelineSection() {
         <div style={{ position: "relative" }}>
           <div style={{ position: "absolute", top: 30, left: 24, right: 24, height: 1, background: "rgba(255,255,255,0.06)" }} />
 
-          <div style={{ display: "grid", gridTemplateColumns: mobile ? "repeat(4, minmax(220px, 1fr))" : "repeat(4, 1fr)", gap: 20, overflowX: "auto", paddingBottom: mobile ? 12 : 0 }}>
-            {entries.map((e, i) => (
-              <motion.div key={e.date} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55, delay: i * 0.1 }}
-                style={{ paddingTop: 60, position: "relative" }}>
-                <div style={{ position: "absolute", top: 22, left: 20, width: 16, height: 16, borderRadius: "50%", background: e.color, boxShadow: `0 0 16px ${e.color}80`, border: `2px solid ${VOID}` }} />
+          {mobile && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                gap: 6,
+                marginBottom: 10,
+                fontSize: 11,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: "rgba(255,255,255,0.4)",
+                fontFamily: "'DM Sans', sans-serif",
+              }}
+              aria-hidden="true"
+            >
+              <span>Swipe</span>
+              <motion.svg
+                width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
+                animate={{ x: [0, 4, 0] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <path d="M5 12h14" />
+                <path d="m13 6 6 6-6 6" />
+              </motion.svg>
+            </div>
+          )}
 
-                <motion.div whileHover={{ y: -4, boxShadow: `0 8px 32px rgba(0,0,0,0.4)` }}
-                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 16, padding: "18px 16px", cursor: "default", transition: "box-shadow 0.2s" }}>
-                  <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", fontFamily: "'DM Sans', sans-serif", marginBottom: 8, letterSpacing: "0.05em" }}>{e.date}</p>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: "#fff", fontFamily: "'DM Sans', sans-serif", marginBottom: 8 }}>{e.label}</p>
-                  <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5 }}>{e.summary}</p>
-                  <div style={{ marginTop: 14, display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", background: `${e.color}15`, border: `1px solid ${e.color}30`, borderRadius: 20 }}>
-                    <div style={{ width: 5, height: 5, borderRadius: "50%", background: e.color }} />
-                    <span style={{ fontSize: 11, color: e.color, fontFamily: "'DM Sans', sans-serif" }}>{e.status}</span>
-                  </div>
+          <div style={{ position: "relative" }}>
+            <div
+              className="vaidy-timeline-scroll"
+              style={{
+                display: "grid",
+                gridTemplateColumns: mobile ? "repeat(4, minmax(220px, 1fr))" : "repeat(4, 1fr)",
+                gap: 20,
+                overflowX: mobile ? "auto" : "visible",
+                paddingBottom: mobile ? 14 : 0,
+                WebkitOverflowScrolling: "touch",
+                scrollSnapType: mobile ? "x proximity" : "none",
+                scrollbarWidth: "thin",
+                scrollbarColor: "rgba(0,217,126,0.35) transparent",
+              }}
+            >
+              {entries.map((e, i) => (
+                <motion.div key={e.date} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55, delay: i * 0.1 }}
+                  style={{ paddingTop: 60, position: "relative", scrollSnapAlign: mobile ? "start" : "none" }}>
+                  <div style={{ position: "absolute", top: 22, left: 20, width: 16, height: 16, borderRadius: "50%", background: e.color, boxShadow: `0 0 16px ${e.color}80`, border: `2px solid ${VOID}` }} />
+
+                  <motion.div whileHover={{ y: -4, boxShadow: `0 8px 32px rgba(0,0,0,0.4)` }}
+                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 16, padding: "18px 16px", cursor: "default", transition: "box-shadow 0.2s" }}>
+                    <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", fontFamily: "'DM Sans', sans-serif", marginBottom: 8, letterSpacing: "0.05em" }}>{e.date}</p>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: "#fff", fontFamily: "'DM Sans', sans-serif", marginBottom: 8 }}>{e.label}</p>
+                    <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5 }}>{e.summary}</p>
+                    <div style={{ marginTop: 14, display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", background: `${e.color}15`, border: `1px solid ${e.color}30`, borderRadius: 20 }}>
+                      <div style={{ width: 5, height: 5, borderRadius: "50%", background: e.color }} />
+                      <span style={{ fontSize: 11, color: e.color, fontFamily: "'DM Sans', sans-serif" }}>{e.status}</span>
+                    </div>
+                  </motion.div>
                 </motion.div>
-              </motion.div>
             ))}
+          </div>
+
+          {mobile && (
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                top: 0,
+                bottom: 14,
+                right: 0,
+                width: 56,
+                pointerEvents: "none",
+                background: `linear-gradient(to left, ${VOID} 0%, rgba(4,5,10,0) 100%)`,
+              }}
+            />
+          )}
           </div>
         </div>
 
@@ -919,7 +1153,7 @@ function FeatureCards() {
   ];
 
   return (
-    <section style={{ background: "#060810", padding: "120px 24px" }}>
+    <section id="features" style={{ background: "#060810", padding: "120px 24px" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}
           style={{ textAlign: "center", marginBottom: 60 }}>
@@ -972,6 +1206,12 @@ function TrustIcon({ variant }) {
           <path d="m8.6 12 2.2 2.2 4.8-5" stroke="currentColor" strokeWidth="1.45" strokeLinecap="round" strokeLinejoin="round" />
           <path d="M8.5 16.2h7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity="0.6" />
         </>
+      ) : variant === "control" ? (
+        <>
+          <path d="M12 14.6V9.4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          <path d="m9.6 11.6 2.4-2.2 2.4 2.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M9 16.4h6" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
+        </>
       ) : (
         <>
           <path d="M8.5 11.8h7" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" />
@@ -1002,9 +1242,9 @@ function PrivacyTrustSection() {
       desc: "You stay in control. Remove reports, conversations, and account data whenever you choose.",
     },
     {
-      icon: "compliance",
-      title: "SOC 2 compliant infrastructure",
-      desc: "Vaidy is built on audited, access-controlled infrastructure designed for sensitive healthcare workflows.",
+      icon: "control",
+      title: "You control your data",
+      desc: "Export or permanently delete your reports and health history at any time, no questions asked.",
     },
   ];
 
@@ -1108,6 +1348,7 @@ function PrivacyTrustSection() {
 
 function FinalCTA({ onOpenWaitlist }) {
   const [hover, setHover] = useState(false);
+  const mobile = useIsMobile();
   return (
     <section style={{ background: VOID, padding: "140px 24px", position: "relative", overflow: "hidden" }}>
       <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
@@ -1116,7 +1357,7 @@ function FinalCTA({ onOpenWaitlist }) {
 
       <div style={{ position: "relative", zIndex: 1, textAlign: "center", maxWidth: 700, margin: "0 auto" }}>
         <motion.h2 initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}
-          style={{ fontSize: "clamp(2.5rem, 6vw, 5rem)", fontWeight: 800, color: "#fff", letterSpacing: "-0.04em", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.05 }}>
+          style={{ fontSize: "clamp(2rem, 8vw, 5rem)", fontWeight: 800, color: "#fff", letterSpacing: "-0.04em", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.05, wordBreak: "break-word" }}>
           Start understanding<br />your health today.
         </motion.h2>
 
@@ -1130,7 +1371,7 @@ function FinalCTA({ onOpenWaitlist }) {
           <motion.button type="button" onClick={onOpenWaitlist}
             onHoverStart={() => setHover(true)} onHoverEnd={() => setHover(false)}
             whileHover={{ scale: 1.04, boxShadow: `0 0 64px rgba(0,217,126,0.5)` }} whileTap={{ scale: 0.97 }}
-            style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "16px 36px", background: `linear-gradient(135deg, ${EMERALD}, ${TEAL})`, color: "#03120a", border: "none", borderRadius: 36, fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", boxShadow: `0 0 40px rgba(0,217,126,0.35)`, cursor: "pointer" }}>
+            style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 10, padding: "16px 36px", background: `linear-gradient(135deg, ${EMERALD}, ${TEAL})`, color: "#03120a", border: "none", borderRadius: 36, fontSize: 16, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", boxShadow: `0 0 40px rgba(0,217,126,0.35)`, cursor: "pointer", width: mobile ? "100%" : "auto", maxWidth: mobile ? 360 : "none" }}>
             <AnimatePresence mode="wait">
               <motion.span key={hover ? "go" : "upload"} initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -12, opacity: 0 }} transition={{ duration: 0.15 }}>
                 {hover ? "Let's go →" : "Upload Your First Report →"}
@@ -1161,9 +1402,9 @@ function Footer() {
           <span style={{ fontSize: 15, fontWeight: 700, color: "#fff", fontFamily: "'DM Sans', sans-serif" }}>vaidy</span>
         </div>
         <div style={{ display: "flex", gap: 20 }}>
-          {["Privacy", "Terms", "Contact"].map(l => (
-            <a key={l} href="#" style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", textDecoration: "none", fontFamily: "'DM Sans', sans-serif", transition: "color 0.15s" }}
-              onMouseEnter={e => e.target.style.color = "#fff"} onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.35)"}>{l}</a>
+          {FOOTER_LINKS.map(({ label, href }) => (
+            <Link key={label} href={href} style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", textDecoration: "none", fontFamily: "'DM Sans', sans-serif", transition: "color 0.15s" }}
+              onMouseEnter={e => e.target.style.color = "#fff"} onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.35)"}>{label}</Link>
           ))}
         </div>
         <p style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", fontFamily: "'DM Sans', sans-serif" }}>© 2025 Vaidy. Built for India.</p>

@@ -1,7 +1,8 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import { useState, type MouseEvent } from "react";
+import { useWaitlist } from "@/components/WaitlistProvider";
 
 const navLinks = [
   { label: "Features", href: "#features" },
@@ -9,46 +10,63 @@ const navLinks = [
   { label: "Demo", href: "#demo" },
 ];
 
+function scrollToAnchor(event: MouseEvent<HTMLAnchorElement>, href: string) {
+  if (!href.startsWith("#")) return;
+  const target = document.getElementById(href.slice(1));
+  if (!target) return;
+  event.preventDefault();
+  window.history.pushState(null, "", href);
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { openWaitlist } = useWaitlist();
+  const { scrollY } = useScroll();
+  const bg = useTransform(scrollY, [0, 80], ["rgba(4,5,10,0)", "rgba(4,5,10,0.92)"]);
+  const borderColor = useTransform(scrollY, [0, 80], ["rgba(255,255,255,0)", "rgba(255,255,255,0.06)"]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-bg-void/55 px-4 py-3 backdrop-blur-2xl md:px-6">
-      <nav className="mx-auto flex h-12 max-w-7xl items-center justify-between" aria-label="Primary navigation">
+    <motion.header
+      className="fixed inset-x-0 top-0 z-[100] border-b backdrop-blur-[24px]"
+      style={{ background: bg, borderColor }}
+    >
+      <div className="mx-auto flex h-[60px] max-w-[1200px] items-center justify-between px-4 md:px-6">
         <a
           href="#hero"
-          className="group inline-flex items-center gap-2 text-base font-semibold tracking-[-0.02em] text-white outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
+          onClick={(event) => scrollToAnchor(event, "#hero")}
+          className="flex items-center gap-2.5 no-underline"
         >
-          <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse-glow" />
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-teal-300">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 3v3M21 12h-3M12 21v-3M3 12h3" stroke="#04050a" strokeWidth="2.5" strokeLinecap="round" />
+              <circle cx="12" cy="12" r="4" fill="#04050a" />
+            </svg>
           </span>
-          Vaidy
+          <span className="text-[17px] font-bold tracking-[-0.03em] text-white">vaidy</span>
         </a>
 
-        <div className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-1 md:flex" aria-label="Primary navigation">
           {navLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="rounded-full px-4 py-2 text-sm text-white/60 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60"
+              onClick={(event) => scrollToAnchor(event, link.href)}
+              className="rounded-full px-3.5 py-1.5 text-[13.5px] text-white/60 transition-colors hover:text-white"
             >
               {link.label}
             </a>
           ))}
-        </div>
-
-        <motion.a
-          href="#try-vaidy"
-          className="relative hidden rounded-full p-px md:inline-flex"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <span className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-400/80 via-teal-300/70 to-indigo-400/70 opacity-80 blur-[1px] transition-opacity hover:opacity-100" />
-          <span className="relative rounded-full bg-bg-void px-5 py-2 text-sm font-medium text-white shadow-[0_0_32px_rgba(52,211,153,0.18)] transition-shadow hover:shadow-[0_0_42px_rgba(52,211,153,0.28)]">
-            Try Vaidy
-          </span>
-        </motion.a>
+          <motion.button
+            type="button"
+            onClick={openWaitlist}
+            className="ml-2 rounded-3xl bg-emerald-400 px-5 py-[7px] text-[13.5px] font-semibold text-[#03120a] shadow-[0_0_24px_rgba(0,217,126,0.3)]"
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            Try free
+          </motion.button>
+        </nav>
 
         <button
           type="button"
@@ -59,27 +77,18 @@ export default function Navbar() {
           onClick={() => setIsOpen((value) => !value)}
         >
           <motion.span className="relative h-4 w-4" animate={isOpen ? "open" : "closed"} initial={false}>
-            <motion.span
-              className="absolute left-0 top-1/2 h-px w-4 bg-current"
-              variants={{ closed: { rotate: 0, y: -5 }, open: { rotate: 45, y: 0 } }}
-            />
-            <motion.span
-              className="absolute left-0 top-1/2 h-px w-4 bg-current"
-              variants={{ closed: { opacity: 1 }, open: { opacity: 0 } }}
-            />
-            <motion.span
-              className="absolute left-0 top-1/2 h-px w-4 bg-current"
-              variants={{ closed: { rotate: 0, y: 5 }, open: { rotate: -45, y: 0 } }}
-            />
+            <motion.span className="absolute left-0 top-1/2 h-px w-4 bg-current" variants={{ closed: { rotate: 0, y: -5 }, open: { rotate: 45, y: 0 } }} />
+            <motion.span className="absolute left-0 top-1/2 h-px w-4 bg-current" variants={{ closed: { opacity: 1 }, open: { opacity: 0 } }} />
+            <motion.span className="absolute left-0 top-1/2 h-px w-4 bg-current" variants={{ closed: { rotate: 0, y: 5 }, open: { rotate: -45, y: 0 } }} />
           </motion.span>
         </button>
-      </nav>
+      </div>
 
       <AnimatePresence>
         {isOpen ? (
           <motion.div
             id="mobile-nav"
-            className="mx-auto mt-3 max-w-7xl overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-xl md:hidden"
+            className="mx-4 mb-3 overflow-hidden rounded-2xl border border-white/10 bg-bg-void/95 md:hidden"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -91,22 +100,28 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   className="rounded-xl px-4 py-3 text-sm text-white/70 hover:bg-white/5 hover:text-white"
-                  onClick={() => setIsOpen(false)}
+                  onClick={(event) => {
+                    scrollToAnchor(event, link.href);
+                    setIsOpen(false);
+                  }}
                 >
                   {link.label}
                 </a>
               ))}
-              <a
-                href="#try-vaidy"
-                className="mt-1 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-center text-sm font-medium text-emerald-400"
-                onClick={() => setIsOpen(false)}
+              <button
+                type="button"
+                className="mt-1 rounded-xl bg-emerald-400 px-4 py-3 text-center text-sm font-semibold text-[#03120a]"
+                onClick={() => {
+                  setIsOpen(false);
+                  openWaitlist();
+                }}
               >
-                Try Vaidy
-              </a>
+                Try free
+              </button>
             </div>
           </motion.div>
         ) : null}
       </AnimatePresence>
-    </header>
+    </motion.header>
   );
 }
