@@ -2,45 +2,47 @@
 
 > Your AI Health Copilot, Built for India.
 
-Vaidy reads blood reports from Apollo, Thyrocare, Lal Path Labs, Dr. Lal and 50+ other labs, detects trends across your biomarkers, and explains everything in plain Hindi or English — no jargon, no chatbot guesswork.
+Vaidy reads blood reports from Apollo, Thyrocare, Lal Path Labs, Dr. Lal and
+50+ other labs, detects trends across your biomarkers, and explains everything
+in plain Hindi or English without jargon or chatbot guesswork.
 
-🌐 Live: [vaidy.vercel.app](https://vaidy.vercel.app)
+Live: [vaidy.vercel.app](https://vaidy.vercel.app)
 
 ---
 
 ## What Vaidy does
 
-- **Reads any format** — PDFs, images, prescriptions, blood tests, MRIs, echoes
-- **Health memory** — builds a searchable record of your reports across time
-- **Plain language** — explanations a 12-year-old can follow, in English or Hindi
-- **Trend detection** — spots patterns across months and years (HbA1c, TSH, Vitamin D, lipids, and more)
-- **Ask anything** — chat naturally with your entire health history
-- **India-first** — built for Indian lab formats, reference ranges, diets, and context
+- Reads many health document formats: PDFs, images, prescriptions, blood tests, MRIs, and echoes
+- Builds a searchable health record across time
+- Explains results in plain English or Hindi
+- Spots biomarker trends across months and years
+- Lets users ask natural questions about their health history
+- Focuses on Indian lab formats, reference ranges, diets, and context
 
 ## Repository layout
 
-```
+```text
 Vaidy/
-└── frontend/        Next.js 14 landing site + waitlist (this repo's only app today)
+|-- frontend/        Next.js 14 landing site and waitlist
+`-- backend/         Python report parsing and biomarker extraction pipeline
 ```
-
-The backend (report parsing, biomarker extraction, conversational layer) is tracked in a separate repo and is not yet open.
 
 ## Frontend
 
-The marketing site is a Next.js 14 App Router project styled with Tailwind CSS and animated with Framer Motion.
+The marketing site is a Next.js 14 App Router project styled with Tailwind CSS
+and animated with Framer Motion.
 
 ### Tech stack
 
-- [Next.js 14](https://nextjs.org) (App Router)
-- React 18 + TypeScript
+- [Next.js 14](https://nextjs.org) App Router
+- React 18 and TypeScript
 - Tailwind CSS
 - Framer Motion
-- Deployed on Vercel
+- Vercel deployment
 
 ### Pages
 
-- `/` — landing page (hero, features, demo, timeline, waitlist)
+- `/` landing page
 - `/contact`
 - `/privacy`
 - `/terms`
@@ -53,7 +55,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the site. Edits to `app/page.tsx` and components in `components/` hot-reload automatically.
+Open [http://localhost:3000](http://localhost:3000) to view the site.
 
 ### Scripts
 
@@ -62,19 +64,42 @@ Open [http://localhost:3000](http://localhost:3000) to view the site. Edits to `
 | `npm run dev`   | Start the dev server          |
 | `npm run build` | Production build              |
 | `npm run start` | Run the production build      |
-| `npm run lint`  | Lint with `eslint-config-next`|
+| `npm run lint`  | Lint with `eslint-config-next` |
+
+## Backend
+
+The backend extracts structured biomarkers from Indian lab reports and saves
+validated JSON output. Runtime model, timeout, retry, page-filter, and image
+DPI settings are controlled through `backend/extractor/extraction_policy.md`.
+
+```bash
+cd backend
+python -m pip install -r requirements.txt
+cp .env.example .env
+python -m extractor.main samples/report1.pdf
+```
+
+Set `NVIDIA_API_KEY` in `backend/.env` for NIM extraction. Without it, use
+`--local-only` to verify local text and OCR fallbacks.
+
+```bash
+python -m pytest -q
+python -m extractor.main samples/report1.pdf --local-only
+```
 
 ## Roadmap
 
-- Report upload + biomarker extraction pipeline
-- Multilingual explanations (Hindi-first, then regional)
+- Report upload plus biomarker extraction pipeline
+- Multilingual explanations, Hindi first and then regional languages
 - Longitudinal trend dashboard
-- Doctor-share view (one-link summaries)
+- Doctor-share view with one-link summaries
 
 ## Contributing
 
-The codebase is small and friendly. Open an issue or PR if you spot a bug, a typo, or have an idea. For feature work, please start a discussion first so we can align on scope.
+The codebase is small and friendly. Open an issue or PR if you spot a bug, a
+typo, or have an idea. For feature work, please start a discussion first so we
+can align on scope.
 
 ## License
 
-TBD — until then, all rights reserved by the Vaidy team.
+TBD. Until then, all rights reserved by the Vaidy team.
