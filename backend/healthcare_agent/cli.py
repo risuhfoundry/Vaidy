@@ -5,10 +5,13 @@ import json
 import sys
 from pathlib import Path
 
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from extractor.main import run_pipeline
 
-from .config import load_agent_settings
-from .store import (
+from healthcare_agent.config import load_agent_settings
+from healthcare_agent.store import (
     answer_question,
     copy_source_to_storage,
     get_report,
