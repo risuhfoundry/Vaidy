@@ -1,0 +1,78 @@
+from __future__ import annotations
+
+import os
+from dataclasses import dataclass
+from pathlib import Path
+
+from extractor.utils import load_environment, parse_float, parse_int, project_root, read_colon_bullets
+
+
+@dataclass(frozen=True)
+class AgentSettings:
+    database_path: Path
+    reports_dir: Path
+    default_output_dir: Path
+    local_primary: bool
+    local_model_repo: str
+    local_model_file: str
+    tokenizer_file: str
+    cache_dir: Path
+    embedding_dim: int
+    max_tokens: int
+    nvidia_model: str
+    timeout_seconds: float
+    search_limit: int
+    nvidia_api_key: str
+    nvidia_base_url: str
+
+
+def load_agent_settings(path: str | Path | None = None) -> AgentSettings:
+    root = project_root()
+    load_environment(root)
+    policy_path = Path(path).expanduser().resolve() if path else Path(__file__).with_name("agent_policy.md")
+    values = _policy_values(policy_path)
+    return AgentSettings(
+        database_path=_path_value("VAIDY_AGENT_DATABASE_PATH", values["storage.database_path"], root),
+        reports_dir=_path_value("VAIDY_AGENT_REPORTS_DIR", values["storage.reports_dir"], root),
+        default_output_dir=_path_value("VAIDY_AGENT_OUTPUT_DIR", values["storage.default_output_dir"], root),
+        local_primary=_bool_value("VAIDY_EMBEDDINGS_LOCAL_PRIMARY", values["embeddings.local_primary"]),
+        local_model_repo=_env_value("VAIDY_ONNX_MODEL_REPO", values["embeddings.local_model_repo"]),
+        local_model_file=_env_value("VAIDY_ONNX_MODEL_FILE", values["embeddings.local_model_file"]),
+        tokenizer_file=_env_value("VAIDY_ONNX_TOKENIZER_FILE", values["embeddings.tokenizer_file"]),
+        cache_dir=_path_value("VAIDY_ONNX_CACHE_DIR", values["embeddings.cache_dir"], root),
+        embedding_dim=parse_int(_env_value("VAIDY_EMBEDDING_DIM", values["embeddings.embedding_dim"])),
+        max_tokens=parse_int(_env_value("VAIDY_EMBEDDING_MAX_TOKENS", values["embeddings.max_tokens"])),
+        nvidia_model=_env_value("NVIDIA_EMBEDDING_MODEL", values["embeddings.nvidia_model"]),
+        timeout_seconds=parse_float(_env_value("VAIDY_EMBEDDING_TIMEOUT_SECONDS", values["embeddings.timeout_seconds"])),
+        search_limit=parse_int(_env_value("VAIDY_AGENT_SEARCH_LIMIT", values["embeddings.search_limit"])),
+        nvidia_api_key=os.getenv("NVIDIA_API_KEY", ""),
+        nvidia_base_url=os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1"),
+    )
+
+
+def _policy_values(path: Path) -> dict[str, str]:
+    entries = read_colon_bullets(path, {"Storage", "Embeddings"})
+    values: dict[str, str] = {}
+    for key, value, section in entries:
+        values[f"{section}.{key.strip().lower()}"] = value
+    return values
+
+
+def _env_value(name: str, fallback: str) -> str:
+    value = os.getenv(name)
+    if value is None or not value.strip():
+        return fallback
+    return value.strip()
+
+
+def _bool_value(name: str, fallback: str) -> bool:
+    value = _env_value(name, fallback).strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def _path_value(name: str, fallback: str, root: Path) -> Path:
+    raw_value = _env_value(name, fallback)
+    path = Path(raw_value).expanduser()
+    if not path.is_absolute():
+        path = root / path
+    return path.resolve()

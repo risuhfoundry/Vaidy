@@ -68,9 +68,12 @@ Open [http://localhost:3000](http://localhost:3000) to view the site.
 
 ## Backend
 
-The backend extracts structured biomarkers from Indian lab reports and saves
-validated JSON output. Runtime model, timeout, retry, page-filter, and image
+The backend extracts structured biomarkers from Indian lab reports, saves
+validated JSON output, and provides a terminal healthcare-agent CLI with local
+SQLite report memory. Runtime model, timeout, retry, page-filter, and image
 DPI settings are controlled through `backend/extractor/extraction_policy.md`.
+Agent storage and embeddings are controlled through
+`backend/healthcare_agent/agent_policy.md`.
 
 ```bash
 cd backend
@@ -85,6 +88,8 @@ Set `NVIDIA_API_KEY` in `backend/.env` for NIM extraction. Without it, use
 ```bash
 python -m pytest -q
 python -m extractor.main samples/report1.pdf --local-only
+python -m healthcare_agent.cli ingest samples/report1.pdf --local-only
+python -m healthcare_agent.cli ask "what biomarkers are high or low"
 ```
 
 ## Roadmap

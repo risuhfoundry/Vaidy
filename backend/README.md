@@ -1,6 +1,6 @@
-# Vaidy Extractor
+# Vaidy Backend
 
-NIM-first PDF biomarker extraction for Indian lab reports.
+Local-first AI healthcare backend for Indian lab reports.
 
 ## Setup
 
@@ -15,7 +15,9 @@ Set `NVIDIA_API_KEY` in `.env`, then run:
 python -m extractor.main samples/report1.pdf
 ```
 
-The pipeline saves:
+## Extractor
+
+The extraction pipeline saves:
 
 - `outputs/debug_text.txt` for the best local text layer found.
 - `outputs/debug_quality.json` for the text quality gate.
@@ -38,3 +40,26 @@ DPI live in `extractor/extraction_policy.md`. The default model is a smaller
 available NVIDIA vision model so ordinary reports do not start on Maverick.
 Environment variables in `.env` can override NIM provider settings for one
 machine without changing code.
+
+## Terminal Healthcare Agent
+
+The terminal agent stores reports and retrieval chunks in a local SQLite
+database by default. It does not require Supabase.
+
+```powershell
+python -m healthcare_agent.cli status
+python -m healthcare_agent.cli ingest samples/report1.pdf --local-only
+python -m healthcare_agent.cli list
+python -m healthcare_agent.cli search cholesterol
+python -m healthcare_agent.cli ask "what biomarkers are high or low"
+```
+
+Embedding order is local first:
+
+1. ONNX-packaged model from `healthcare_agent/agent_policy.md`.
+2. NVIDIA embedding API fallback when the local ONNX path is unavailable and `NVIDIA_API_KEY` is configured.
+3. Local hash vectors as the final offline fallback so the CLI remains usable.
+
+Agent storage, ONNX model, cache path, embedding dimension, and search limits
+live in `healthcare_agent/agent_policy.md`, with `.env` overrides for local
+machine settings.

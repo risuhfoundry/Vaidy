@@ -7,6 +7,22 @@ Good. You have a real sample now. Let me diagnose exactly what's happening befor
 - Page triage uses local PyMuPDF text, numeric structure, and biomarker aliases from `extractor/biomarker_aliases.md`; it does not use an added keyword list.
 - Interim report status and `PENDING` biomarker flags are supported through schema, normalization, prompt, and markdown metadata fields.
 
+## New Agent Tasks
+
+- Keep local embeddings primary and use NVIDIA embeddings only as the online fallback.
+- Use ONNX runtime for the local embedding path instead of a separate embedding framework runtime.
+- Store reports, extracted JSON, chunks, and vectors in a local SQLite database and local storage folder for now.
+- Provide a terminal healthcare-agent CLI for ingesting, listing, searching, showing, and asking over reports.
+- Follow the local-first embedding shape inspected in `C:\Users\anime\3D Objects\KING`.
+
+## New Agent Implementation Notes
+
+- `healthcare_agent/agent_policy.md` owns agent storage and embedding settings.
+- `healthcare_agent/embedder.py` attempts ONNX first, NVIDIA embeddings second, and a local offline hash vector only as a last-resort runtime safety path.
+- `healthcare_agent/store.py` writes SQLite state under `storage/health_agent.db` and report JSON copies under `storage/reports`.
+- `healthcare_agent/cli.py` exposes `status`, `ingest`, `import-json`, `list`, `show`, `search`, and `ask`.
+- Verification showed a real CLI ingest storing chunks with provider `local_onnx`.
+
 ---
 
 ## Diagnosis — Two Separate Problems
