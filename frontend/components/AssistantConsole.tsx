@@ -4,8 +4,6 @@ import { FormEvent, KeyboardEvent, useCallback, useEffect, useMemo, useRef, useS
 import Link from "next/link";
 import {
   ChatDonePayload,
-  EvidenceHit,
-  MemoryHit,
   ProcessInputSummary,
   VaidyMessage,
   VaidyStatus,
@@ -20,7 +18,6 @@ type ChatRecord = {
   content: string;
   pending?: boolean;
   model?: string;
-  evidence?: EvidenceHit[];
 };
 
 const promptChips = [
@@ -47,10 +44,7 @@ export default function AssistantConsole() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [streamLabel, setStreamLabel] = useState("ready");
-  const [lastEvidence, setLastEvidence] = useState<EvidenceHit[]>([]);
-  const [lastMemory, setLastMemory] = useState<MemoryHit[]>([]);
   const [lastProcess, setLastProcess] = useState<ProcessInputSummary | null>(null);
-  const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [sessionId, setSessionId] = useState("");
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -67,7 +61,6 @@ export default function AssistantConsole() {
   }, [messages]);
 
   const hasUserMessages = messages.some((message) => message.role === "user");
-  const evidenceCount = lastEvidence.length + lastMemory.length;
 
   const syncSessionId = useCallback((value: unknown) => {
     if (typeof value !== "string" || !value.trim()) return;
@@ -190,9 +183,6 @@ export default function AssistantConsole() {
             streamBufferRef.current = payload.text || "";
           }
           flushStream();
-          setLastEvidence(payload.evidence || []);
-          setLastMemory(payload.memory || []);
-          setEvidenceOpen(Boolean((payload.evidence && payload.evidence.length) || (payload.memory && payload.memory.length)));
           setMessages((current) =>
             current.map((message) =>
               message.id === assistantId
@@ -201,7 +191,6 @@ export default function AssistantConsole() {
                     content: streamBufferRef.current || payload.text,
                     pending: false,
                     model: payload.model,
-                    evidence: payload.evidence || [],
                   }
                 : message,
             ),
@@ -260,13 +249,6 @@ export default function AssistantConsole() {
             >
               {isProcessing ? "Processing" : "Process input"}
             </button>
-            <button
-              type="button"
-              onClick={() => setEvidenceOpen((value) => !value)}
-              className="rounded-lg border border-white/[0.09] px-3 py-2 font-semibold text-white/70 transition hover:border-[#00d97e]/40 hover:text-white"
-            >
-              Evidence {evidenceCount ? evidenceCount : ""}
-            </button>
             <span className="flex items-center gap-2">
               <span className={`h-2 w-2 rounded-full ${statusError ? "bg-red-400" : "bg-[#00d97e]"}`} />
               <span>{statusError ? "offline" : "live"}</span>
@@ -287,8 +269,6 @@ export default function AssistantConsole() {
               </div>
             </div>
           </div>
-
-          <EvidenceDrawer open={evidenceOpen} evidence={lastEvidence} memory={lastMemory} onClose={() => setEvidenceOpen(false)} />
 
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#050608] via-[#050608] to-transparent px-4 pb-4 pt-10">
             <div className="mx-auto max-w-3xl">
@@ -362,7 +342,7 @@ function Intro({ status, streamLabel }: { status: VaidyStatus | null; streamLabe
         Clean report memory, live answers.
       </h1>
       <p className="mt-5 max-w-xl text-[15px] leading-7 text-white/58">
-        Drop reports into the input folder, then ask Vaidy to process them, search memory, or explain what the saved evidence says.
+        Drop reports into the input folder, then ask Vaidy to process them, search memory, or explain what the saved report memory says.
       </p>
       <div className="mt-5 flex flex-wrap gap-2 text-xs text-white/45">
         <Chip label="Reports" value={status ? String(status.report_count) : "..."} />
@@ -393,8 +373,11 @@ function MessageBlock({ message }: { message: ChatRecord }) {
               : "text-[15px] leading-8 text-white/82"
           }
         >
-          <span className="whitespace-pre-wrap">{message.content || "..."}</span>
-          {message.pending ? <span className="ml-1 inline-block animate-pulse text-[#00d97e]">|</span> : null}
+          {isUser ? (
+            <span className="whitespace-pre-wrap">{message.content || "..."}</span>
+          ) : (
+            <AnimatedAssistantText active={Boolean(message.pending)} text={message.content || "..."} />
+          )}
         </div>
         {message.model && !isUser ? (
           <p className="mt-3 text-[11px] text-white/22">
@@ -406,64 +389,53 @@ function MessageBlock({ message }: { message: ChatRecord }) {
   );
 }
 
-function EvidenceDrawer({
-  open,
-  evidence,
-  memory,
-  onClose,
-}: {
-  open: boolean;
-  evidence: EvidenceHit[];
-  memory: MemoryHit[];
-  onClose: () => void;
-}) {
-  if (!open) return null;
-  return (
-    <div className="absolute bottom-32 right-4 top-4 z-20 w-[min(360px,calc(100vw-32px))] rounded-2xl border border-white/[0.1] bg-[#090b12]/95 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.5)] backdrop-blur-xl">
-      <div className="flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/45">Evidence</p>
-        <button type="button" onClick={onClose} className="rounded-lg px-2 py-1 text-sm text-white/45 hover:bg-white/[0.06] hover:text-white">
-          Close
-        </button>
-      </div>
-      <div className="scrollbar-none mt-4 max-h-[calc(100%-48px)] space-y-3 overflow-y-auto overflow-x-hidden">
-        {evidence.length || memory.length ? (
-          <>
-            {memory.map((hit) => (
-              <div key={`memory-${hit.id}`} className="rounded-xl border border-[#00d97e]/15 bg-[#00d97e]/[0.045] p-3">
-                <div className="flex items-center justify-between gap-3 text-xs">
-                  <span className="font-bold text-[#00d97e]">memory</span>
-                  <span className="text-white/35">{hit.score.toFixed(4)}</span>
-                </div>
-                <p className="mt-2 text-xs leading-5 text-white/62">{hit.text}</p>
-              </div>
-            ))}
-            {evidence.map((hit) => (
-              <div key={`${hit.report_id}-${hit.chunk_id}`} className="rounded-xl border border-white/[0.08] bg-white/[0.035] p-3">
-                <div className="flex items-center justify-between gap-3 text-xs">
-                  <span className="font-bold text-[#00d97e]">report {hit.report_id}</span>
-                  <span className="text-white/35">{hit.score.toFixed(4)}</span>
-                </div>
-                <p className="mt-2 text-xs leading-5 text-white/58">{hit.text}</p>
-              </div>
-            ))}
-          </>
-        ) : (
-          <p className="rounded-xl border border-white/[0.08] bg-white/[0.035] p-3 text-sm leading-6 text-white/55">
-            Evidence and memory will appear here when Vaidy uses saved context.
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
-
 function ProcessNote({ summary }: { summary: ProcessInputSummary }) {
   return (
     <div className="mx-auto max-w-xl rounded-xl border border-[#00d97e]/15 bg-[#00d97e]/[0.055] px-4 py-3 text-sm text-white/65">
       Input checked: {summary.processed.length} processed, {summary.skipped.length} skipped, {summary.failed.length} failed.
     </div>
   );
+}
+
+function AnimatedAssistantText({ active, text }: { active: boolean; text: string }) {
+  const segments = splitTextSegments(text);
+  return (
+    <span className="whitespace-pre-wrap">
+      {segments.map((segment, index) =>
+        segment.kind === "space" ? (
+          <span key={`${index}-space`}>{segment.text}</span>
+        ) : (
+          <span
+            key={`${index}-${segment.text}`}
+            className="stream-token"
+            style={{ animationDelay: `${Math.min(index * 12, 180)}ms` }}
+          >
+            {segment.text}
+          </span>
+        ),
+      )}
+      {active ? <span className="stream-caret" aria-hidden="true" /> : null}
+    </span>
+  );
+}
+
+function splitTextSegments(text: string) {
+  const segments: Array<{ kind: "text" | "space"; text: string }> = [];
+  let current = "";
+  let currentKind: "text" | "space" | "" = "";
+  for (const character of text) {
+    const nextKind = character === " " || character === "\n" || character === "\t" ? "space" : "text";
+    if (currentKind && nextKind !== currentKind) {
+      segments.push({ kind: currentKind, text: current });
+      current = "";
+    }
+    current += character;
+    currentKind = nextKind;
+  }
+  if (currentKind) {
+    segments.push({ kind: currentKind, text: current });
+  }
+  return segments;
 }
 
 function Chip({ label, value }: { label: string; value: string }) {
