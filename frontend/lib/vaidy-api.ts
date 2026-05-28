@@ -79,15 +79,23 @@ type StreamHandlers = {
 
 export function vaidyApiBase() {
   const configured = process.env.NEXT_PUBLIC_VAIDY_API_URL;
-  let base = configured && configured.trim() ? configured.trim() : "http://localhost:8000";
+  let base = configured && configured.trim() ? configured.trim() : "";
   while (base.endsWith("/")) {
     base = base.slice(0, -1);
   }
   return base;
 }
 
+function vaidyApiUrl(path: string) {
+  const base = vaidyApiBase();
+  if (!base) {
+    return `/api/vaidy${path}`;
+  }
+  return `${base}/api${path}`;
+}
+
 export async function getVaidyStatus(): Promise<VaidyStatus> {
-  const response = await fetch(`${vaidyApiBase()}/api/status`, { cache: "no-store" });
+  const response = await fetch(vaidyApiUrl("/status"), { cache: "no-store" });
   if (!response.ok) {
     throw new Error(`Status failed with ${response.status}`);
   }
@@ -95,7 +103,7 @@ export async function getVaidyStatus(): Promise<VaidyStatus> {
 }
 
 export async function processInputFolder(localOnly = false): Promise<ProcessInputSummary> {
-  const response = await fetch(`${vaidyApiBase()}/api/process-input`, {
+  const response = await fetch(vaidyApiUrl("/process-input"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ local_only: localOnly }),
@@ -113,7 +121,7 @@ export async function streamVaidyChat(
   sessionId: string,
   handlers: StreamHandlers,
 ) {
-  const response = await fetch(`${vaidyApiBase()}/api/chat/stream`, {
+  const response = await fetch(vaidyApiUrl("/chat/stream"), {
     method: "POST",
     headers: {
       Accept: "text/event-stream",

@@ -69,6 +69,8 @@ export default function AssistantConsole() {
   }, [messages]);
 
   const hasUserMessages = messages.some((message) => message.role === "user");
+  const connectionLabel = statusError ? "offline" : status ? "live" : "connecting";
+  const connectionDotClass = statusError ? "bg-red-400" : status ? "bg-[#00d97e]" : "bg-amber-300";
 
   const syncSessionId = useCallback((value: unknown) => {
     if (typeof value !== "string" || !value.trim()) return;
@@ -345,8 +347,8 @@ export default function AssistantConsole() {
               {isProcessing ? "Processing" : "Process input"}
             </button>
             <span className="flex items-center gap-2">
-              <span className={`h-2 w-2 rounded-full ${statusError ? "bg-red-400" : "bg-[#00d97e]"}`} />
-              <span>{statusError ? "offline" : "live"}</span>
+              <span className={`h-2 w-2 rounded-full ${connectionDotClass}`} />
+              <span>{connectionLabel}</span>
             </span>
           </div>
         </header>
@@ -419,7 +421,9 @@ export default function AssistantConsole() {
               <p className="mt-2 text-center text-[11px] text-white/28">
                 {statusError
                   ? statusError
-                  : `Reports: ${status?.report_count ?? "..."} | Memory: ${status?.memory?.entries ?? "..."} | Stream: ${streamLabel}`}
+                  : status
+                    ? `Reports: ${status.report_count} | Memory: ${status.memory?.entries ?? "..."} | Stream: ${streamLabel}`
+                    : `Connecting to API... | Stream: ${streamLabel}`}
               </p>
             </div>
           </div>
