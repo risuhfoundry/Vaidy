@@ -1,15 +1,42 @@
-import type { MetadataRoute } from "next";
-import { SITE_URL } from "@/lib/seo";
+import { MetadataRoute } from "next"
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date();
-
   return [
-    { url: SITE_URL, lastModified, changeFrequency: "weekly", priority: 1 },
-    { url: `${SITE_URL}/chat`, lastModified, changeFrequency: "monthly", priority: 0.9 },
-    { url: `${SITE_URL}/dashboard`, lastModified, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${SITE_URL}/privacy`, lastModified, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${SITE_URL}/terms`, lastModified, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${SITE_URL}/contact`, lastModified, changeFrequency: "yearly", priority: 0.4 },
-  ];
+    {
+      url: "https://vaidy.vercel.app",
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 1,
+    },
+    {
+      url: "https://vaidy.vercel.app/chat",
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: "https://vaidy.vercel.app/dashboard",
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: "https://vaidy.vercel.app/privacy",
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
+      url: "https://vaidy.vercel.app/terms",
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
+      url: "https://vaidy.vercel.app/contact",
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.4,
+    },
+  ]
 }
