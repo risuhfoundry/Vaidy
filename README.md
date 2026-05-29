@@ -26,7 +26,7 @@
 ## 🖼️ Preview
 
 <div align="center">
-  <img src="./screenshots/vaidy-landing.png" alt="Vaidy Landing Page — Your health, finally decoded." width="100%"/>
+  <img src="https://raw.githubusercontent.com/akyourowngames/Hackthon-healthcare-agent/main/vaidy-landing.png" alt="Vaidy Landing Page — Your health, finally decoded." width="100%"/>
   <br/>
   <sub>Live at <a href="https://vaidy.vercel.app/">vaidy.vercel.app</a></sub>
 </div>
