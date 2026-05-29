@@ -363,6 +363,10 @@ def dashboard_snapshot(user_id: str | None = None, settings: AgentSettings | Non
     safe_user_id = str(user_id or active_settings.default_user_id).strip() or active_settings.default_user_id
     history = list_biomarker_history(safe_user_id, settings=active_settings)
     findings = list_anomaly_findings(safe_user_id, active_settings)
+    # If the authenticated user has no data, try the default user as fallback
+    if not history and not findings and safe_user_id != active_settings.default_user_id:
+        history = list_biomarker_history(active_settings.default_user_id, settings=active_settings)
+        findings = list_anomaly_findings(active_settings.default_user_id, active_settings)
     score = compute_health_score(history, findings, policy_from_settings(active_settings))
     grouped: dict[str, list[dict[str, Any]]] = {}
     for row in history:

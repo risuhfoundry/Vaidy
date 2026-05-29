@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import threading
 import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import asdict, dataclass
 from datetime import datetime
@@ -57,7 +58,10 @@ def upload_file_to_storage(
         base_url = active_settings.supabase_url.rstrip("/")
         safe_user = user_id.replace("/", "_").replace("\\", "_")
         storage_path = f"{safe_user}/{file_path.name}"
-        url = f"{base_url}/storage/v1/object/User Data/{storage_path}"
+        bucket_name = "User Data"
+        encoded_bucket = urllib.parse.quote(bucket_name)
+        encoded_path = urllib.parse.quote(storage_path)
+        url = f"{base_url}/storage/v1/object/{encoded_bucket}/{encoded_path}"
         content = file_path.read_bytes()
         content_type = _guess_content_type(file_path.suffix.lower())
         request = urllib.request.Request(url, data=content, method="POST")
@@ -67,7 +71,7 @@ def upload_file_to_storage(
         with urllib.request.urlopen(request, timeout=active_settings.supabase_timeout_seconds) as response:
             if response.status >= 400:
                 raise RuntimeError(f"Storage upload failed with {response.status}")
-        public_url = f"{base_url}/storage/v1/object/public/User Data/{storage_path}"
+        public_url = f"{base_url}/storage/v1/object/public/{encoded_bucket}/{encoded_path}"
         return {"uploaded": True, "path": storage_path, "public_url": public_url}
     except Exception as exc:
         _write_sync_error(active_settings, 0, exc)
