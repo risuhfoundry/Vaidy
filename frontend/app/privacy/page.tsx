@@ -2,9 +2,20 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Vaidy",
+  title: {
+    absolute: "Privacy Policy | Vaidy Health",
+  },
   description:
-    "How Vaidy handles uploaded blood test PDF reports and chat messages in its hackathon prototype.",
+    "How Vaidy protects your health data. We never sell to insurers or pharma. DPDP Act 2023 compliant. End-to-end encrypted.",
+  alternates: {
+    canonical: "https://vaidy.vercel.app/privacy",
+  },
+  openGraph: {
+    title: "Privacy Policy | Vaidy Health",
+    description:
+      "How Vaidy protects your health data. We never sell to insurers or pharma. DPDP Act 2023 compliant. End-to-end encrypted.",
+    url: "https://vaidy.vercel.app/privacy",
+  },
 };
 
 const sections = [
